@@ -1,61 +1,34 @@
-import type { TextUnit, VersionDocument } from './types';
+import type { VersionDocument } from './types';
+import { makeVersion } from './lib/text';
 
-export const sampleTextA = `古之善为道者，微妙玄通，深不可识。夫唯不可识，故强为之容。
+/** 《老子》第十五章（节录）传世本异文示例，仅作演示数据 */
+const sampleTextA = `古之善为士者，微妙玄通，深不可识。夫唯不可识，故强为之容。
 豫兮若冬涉川，犹兮若畏四邻。俨兮其若客，涣兮若冰之将释。
 敦兮其若朴，旷兮其若谷，混兮其若浊。
-孰能浊以静之徐清？孰能安以动之徐生？保此道者不欲盈。`;
+孰能浊以静之徐清？孰能安以动之徐生？保此道者不欲盈。
+夫唯不盈，故能蔽不新成。`;
 
-export const sampleTextB = `古之善為道者，微玅玄通，深不可識。夫唯不可識，故強為之容。
-與兮若冬涉川，猶兮若畏四鄰。儼兮其若客，渙兮若冰之將釋。
-敦兮其若樸，曠兮其若谷，混兮其若濁。湛兮其若存。
-孰能濁以靜之徐清？孰能安以動之徐生？保此道者不欲盈。`;
+const sampleTextB = `古之善为道者，微玅玄通，深不可識。夫唯不可識，故強為之容。
+與呵其若冬涉水，猶呵其若畏四鄰。嚴呵其若客，渙呵其若冰之將釋。
+沌呵其若樸，湷呵其若濁，湛呵其若谷。
+孰能濁以靜之徐清？孰能安以動之徐生？葆此道者不欲盈。
+夫唯不欲盈，是以能敝而不成。`;
 
-export const sampleTextC = `古代善于行道的人，精微通达，深邃得难以认识。正因为难以认识，只能勉强形容。
-小心啊，像冬天涉水过河；警觉啊，像提防四周的邻国。恭敬啊，像做客；散融啊，像冰将要消解。
-敦厚啊，像未经雕琢的原木；开阔啊，像山谷；浑厚啊，像浊水。
-谁能使浊水安静下来，慢慢澄清？谁能在安定中发动，慢慢产生生机？持守此道的人，不求盈满。`;
+const sampleTextC = `古之善為士者，微妙玄通，深不可識。夫唯不可識，故強為之容。
+豫焉若冬涉川，猶兮若畏四鄰。儼兮其若容，渙兮若冰之將釋。
+敦兮其若樸，曠兮其若谷，混兮其若濁。
+孰能濁以靜之徐清？孰能安以久動之徐生？保此道者不欲盈。
+夫唯不盈，故能蔽不新成。`;
+
+const sampleTextD = `古代善于行道的人，精微玄妙而通达，深邃得难以认识。正因为难以认识，只能勉强形容他。
+谨慎啊，像冬天赤脚涉水过河；警惕啊，像提防四周的邻国。庄重啊，像赴宴做客；涣散啊，像冰雪将要消融。
+敦厚啊，像未经雕琢的原木；空旷啊，像幽深的山谷；浑厚啊，像一汪浊水。
+谁能让浊水安静下来，慢慢澄清？谁能在安定中变动，让生机慢慢生长？持守此道的人不求盈满。
+正因为不求盈满，所以能去故更新而不自满。`;
 
 export const sampleVersions: VersionDocument[] = [
-  version('version-a', '王弼注本（底本）', '传世刻本', sampleTextA),
-  version('version-b', '帛书参校本', '出土文献整理稿', sampleTextB),
-  version('version-c', '现代语译本', '编辑部参考译文', sampleTextC)
+  makeVersion('version-wangbi', '王弼注本', '楼宇烈校释本', sampleTextA, '2026-09-25T02:00:00.000Z'),
+  makeVersion('version-boshu', '帛书老子', '马王堆帛书整理稿', sampleTextB, '2026-09-25T02:00:00.000Z'),
+  makeVersion('version-jinglong', '景龙碑本', '唐景龙二年易州龙兴观碑', sampleTextC, '2026-09-25T02:00:00.000Z'),
+  makeVersion('version-trans', '现代语译本', '编辑部参考译文', sampleTextD, '2026-09-25T02:00:00.000Z')
 ];
-
-function version(id: string, name: string, source: string, text: string): VersionDocument {
-  return {
-    id,
-    name,
-    source,
-    text,
-    units: splitIntoUnits(text, id),
-    createdAt: '2026-09-25T02:00:00.000Z'
-  };
-}
-
-export function splitIntoUnits(text: string, versionId: string): TextUnit[] {
-  const paragraphs = text
-    .split(/\n\s*\n|\n/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-  const units: TextUnit[] = [];
-  let sentenceOrder = 1;
-
-  paragraphs.forEach((paragraph, paragraphIndex) => {
-    const sentences = paragraph
-      .split(/(?<=[。！？!?；;])/)
-      .map((item) => item.trim())
-      .filter(Boolean);
-    const paragraphId = `${versionId}-p-${paragraphIndex + 1}`;
-    (sentences.length ? sentences : [paragraph]).forEach((sentence) => {
-      units.push({
-        id: `${paragraphId}-s-${units.length + 1}`,
-        paragraphId,
-        paragraphOrder: paragraphIndex + 1,
-        sentenceOrder: sentenceOrder++,
-        paragraphText: paragraph,
-        text: sentence
-      });
-    });
-  });
-  return units;
-}
